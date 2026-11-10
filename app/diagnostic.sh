@@ -65,3 +65,4 @@ cmd_disk() {
 }
 
 
+main "$@"
