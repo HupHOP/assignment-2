@@ -65,4 +65,41 @@ cmd_disk() {
 }
 
 
+
+main() {
+    if [[ $# -lt 1 ]]; then
+        echo "Error: no command given" >&2
+        usage >&2
+        exit 2
+    fi
+
+    local cmd="$1"
+    shift
+
+    case "$cmd" in
+        system)
+            cmd_system
+            ;;
+        network)
+            if [[ $# -lt 1 ]]; then
+                echo "Error: 'network' requires a host" >&2
+                usage >&2
+                exit 2
+            fi
+            cmd_network "$1"
+            ;;
+        disk)
+            cmd_disk
+            ;;
+        help|-h|--help)
+            usage
+            ;;
+        *)
+            echo "Error: unknown command '$cmd'" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+}
+
 main "$@"
