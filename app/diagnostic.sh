@@ -52,8 +52,43 @@ cmd_system() {
     row "Working Directory" "$(pwd)"
 }
 
+is_valid_host() {
+    local h="$1"
+    [[ -n "$h" && ${#h} -le 253 ]] || return 1
+    [[ "$h" != *..* ]] || return 1
+    [[ "$h" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ ]]
+}
+
 cmd_network() {
-    echo "network: not implemented yet (host: $1)"
+    local host="$1"
+
+    if ! is_valid_host "$host"; then
+        echo "Error: invalid hostname or IP address: $host" >&2
+        exit 2
+    fi
+
+    echo "Network check for: $host"
+
+    local resolved=""
+    if command -v getent >/dev/null 2>&1; then
+        resolved="$(getent ahosts "$host" | awk 'NR==1 {print $1}')"
+    fi
+    if [[ -z "$resolved" ]]; then
+        echo "Resolution: FAILED - could not resolve $host" >&2
+        exit 1
+    fi
+    echo "Resolved address: $resolved"
+
+    if ! command -v ping >/dev/null 2>&1; then
+        echo "Ping: skipped (ping is not installed)"
+    elif ping -c 2 -W 2 -- "$host" >/dev/null 2>&1; then
+        echo "Ping: host is reachable"
+    else
+        echo "Ping: no reply from $host" >&2
+        exit 1
+    fi
+
+    echo "Result: all checks passed"
 }
 
 cmd_disk() {
