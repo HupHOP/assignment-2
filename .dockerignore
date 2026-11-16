@@ -1,0 +1,9 @@
+.git
+.gitignore
+logs
+*.log
+*.swp
+.DS_Store
+grade.sh
+test.sh
+README.md
